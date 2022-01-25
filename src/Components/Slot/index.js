@@ -2,32 +2,26 @@ import React from 'react';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button'
+import Image from '../Image';
 
-const Slot = ({ number, image, held, click }) => {
+const Slot = ({ roll, image, held, click, id, roundOver }) => {
     return (
-        <Col className="slot">
-            <Row>
-                <Col>
-                    {image}
-                </Col>
-            </Row>
-            <Row>
-                <Col>
-                    {number}
-                </Col>
-            </Row>
-            <Row>
+        <Col className="slot" style={{ 'margin': '1%' }}>
+            <Image image={image} roll={roll} />
+            <Row style={{ 'margin': '1%' }}>
                 <Col>
                     <Button
-                        variant={!held ? "outline-warning" : "success"}
+                        id={id}
+                        variant={!held ? "outline-warning" : "danger"}
                         onClick={e => click(e)}
+                        disabled={roll === 0 || roundOver ? true : ''}
                     >
                         {!held ? "Hold" : "Held"}
                     </Button>{' '}
                 </Col>
             </Row>
         </Col>
-    )
+    );
 };
 
 export default Slot;
