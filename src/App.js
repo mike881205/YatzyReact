@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import Stage from "./Components/Stage";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const scoreBoard = [
+const blankScoreBoard = [
   {
     section: 'top',
     hands: [
@@ -10,42 +10,42 @@ const scoreBoard = [
         name: 'Aces',
         valid: false,
         used: false,
-        getScore: count => { return count * 1 },
+        value: 1,
         score: 0
       },
       {
         name: 'Twos',
         valid: false,
         used: false,
-        getScore: count => { return count * 2 },
+        value: 2,
         score: 0
       },
       {
         name: 'Threes',
         valid: false,
         used: false,
-        getScore: count => { return count * 3 },
+        value: 3,
         score: 0
       },
       {
         name: 'Fours',
         valid: false,
         used: false,
-        getScore: count => { return count * 4 },
+        value: 4,
         score: 0
       },
       {
         name: 'Fives',
         valid: false,
         used: false,
-        getScore: count => { return count * 5 },
+        value: 5,
         score: 0
       },
       {
         name: 'Sixes',
         valid: false,
         used: false,
-        getScore: count => { return count * 6 },
+        value: 6,
         score: 0
       }
     ],
@@ -60,59 +60,50 @@ const scoreBoard = [
         name: '3 Of A Kind',
         valid: false,
         used: false,
-        getScore: arr => { return arr.reduce((a, b) => a + b) },
         score: 0
       },
       {
         name: '4 Of A Kind',
         valid: false,
         used: false,
-        getScore: arr => { return arr.reduce((a, b) => a + b) },
         score: 0
       },
       {
         name: 'Full House',
         valid: false,
         used: false,
-        getScore: null,
         score: 25
       },
       {
         name: 'Small Straight',
         valid: false,
         used: false,
-        getScore: null,
         score: 30
       },
       {
         name: 'Large Straight',
         valid: false,
         used: false,
-        getScore: null,
         score: 40
       },
       {
         name: 'Yatzy',
         valid: false,
         used: false,
-        getScore: null,
         score: 50
       },
       {
         name: 'Chance',
         valid: false,
         used: false,
-        getScore: arr => { return arr.reduce((a, b) => a + b) },
         score: 0
       },
       {
         name: 'Yatzy Bonus',
         valid: false,
-        used: false,
         total: 0,
-        getScore: () => {return this.total * 100},
-        score: 0
-      },
+        score: 100
+      }
     ],
     handsTotal: 0
   },
@@ -121,11 +112,9 @@ const scoreBoard = [
   }
 ]
 
-const getHandsTotal = handArr => {
-  const scoresArr = handArr.map(hand => { return hand.score });
-  console.log(scoresArr)
-  return scoresArr.reduce((a, b) => a + b);
-}
+const totalValues = handArr => {
+  return handArr.reduce((a, b) => a + b);
+};
 
 const letters = Array.from("YATZY");
 
@@ -156,6 +145,119 @@ const removeUniques = arr => {
   return arr.filter(a => map.get(a) > 1);
 };
 
+const checkTopHands = (objArray, scoreBoard) => {
+  objArray.forEach(obj => {
+    scoreBoard[0].hands.forEach(hand => {
+      if (obj.value === hand.value && !hand.used) {
+        hand.valid = true;
+        hand.score = hand.value * obj.count;
+      };
+    });
+  });
+  return scoreBoard;
+};
+
+const checkStraights = (unqObjArray, scoreBoard) => {
+  let count = 1;
+
+  for (let i = 1; i < unqObjArray.length; i++) {
+    if (unqObjArray[i] - unqObjArray[i - 1] === 1) { count++ }
+    else {
+      if (count < 4) { count = 1 };
+    } 
+  };
+
+  if (count >= 4) {
+    switch (count) {
+      case 4:
+        if (!scoreBoard[1].hands[3].used) scoreBoard[1].hands[3].valid = true;
+        break;
+      default:
+        if (!scoreBoard[1].hands[3].used) scoreBoard[1].hands[3].valid = true;
+        if (!scoreBoard[1].hands[4].used) scoreBoard[1].hands[4].valid = true;
+        break;
+    };
+  };
+
+  return scoreBoard;
+};
+
+const checkKinds = (sortedArr, objArray, scoreBoard) => {
+  let FHdouble = false;
+  let FHtriple = false;
+
+  objArray.forEach(obj => {
+    if (obj.count >= 2) {
+      switch(obj.count) {
+        case 2:
+          FHdouble = true
+        break;
+        case 3:
+          FHtriple = true
+          if (!scoreBoard[1].hands[0].used){
+            scoreBoard[1].hands[0].valid = true;
+            scoreBoard[1].hands[0].score = totalValues(sortedArr);
+          };
+        break;
+        case 4:
+          if (!scoreBoard[1].hands[0].used){
+            scoreBoard[1].hands[0].valid = true;
+            scoreBoard[1].hands[0].score = totalValues(sortedArr);
+          };
+          if (!scoreBoard[1].hands[1].used){
+            scoreBoard[1].hands[1].valid = true;
+            scoreBoard[1].hands[1].score = totalValues(sortedArr);
+          };
+        break;
+        default:
+          if (!scoreBoard[1].hands[0].used){
+            scoreBoard[1].hands[0].valid = true;
+            scoreBoard[1].hands[0].score = totalValues(sortedArr);
+          };
+          if (!scoreBoard[1].hands[1].used){
+            scoreBoard[1].hands[1].valid = true;
+            scoreBoard[1].hands[1].score = totalValues(sortedArr);
+          };
+          if (!scoreBoard[1].hands[5].used){
+            scoreBoard[1].hands[5].valid = true;
+          }
+          else {
+            scoreBoard[1].hands[7].valid = true;
+          };
+        break;
+      };
+    };
+  });
+
+  if (FHdouble && FHtriple && !scoreBoard[1].hands[2].used) scoreBoard[1].hands[2].valid = true
+
+  return scoreBoard;
+};
+
+const checkHands = (sortedArr, scoreBoard) => {
+
+  if (!scoreBoard[1].hands[6].used) {
+    scoreBoard[1].hands[6].valid = true;
+    scoreBoard[1].hands[6].score = totalValues(sortedArr);
+  };
+
+  const uniqueVals = removeDuplicates(sortedArr);
+
+  const unqObjArray = uniqueVals.map(unqVal => {
+    let unqObj = { value: unqVal, count: 0 };
+    sortedArr.forEach(srtdVal => {
+      if (unqVal === srtdVal) unqObj.count++;
+    });
+    return unqObj;
+  });
+
+  const newBoard1 = checkTopHands(unqObjArray, scoreBoard)
+  const newBoard2 = checkStraights(uniqueVals, newBoard1)
+  const newBoard3 = checkKinds(sortedArr, unqObjArray, newBoard2)
+
+  return newBoard3;
+};
+
 class App extends Component {
 
   state = {
@@ -172,7 +274,7 @@ class App extends Component {
 
   resetGame = () => {
     this.setState({
-      scoreBoard: scoreBoard,
+      scoreBoard: blankScoreBoard,
       slots: blankArr,
       roundOver: true,
       gameOver: true
@@ -192,16 +294,23 @@ class App extends Component {
 
   endRound = slots => {
 
+    const scoreBoard = [...this.state.scoreBoard];
+
     const finalVals = slots.map(slot => { return slot.number });
+    // let finalVals = [1,1,1,6,6]
 
     const sortedVals = finalVals.sort((a, b) => { return a - b });
-    console.log(`Sorted Vals: \n${sortedVals}`)
+    console.log(sortedVals)
+    
+    const newBoard = checkHands(sortedVals, scoreBoard);
 
-    const uniqueArr = removeDuplicates(sortedVals);
-    console.log(`No Duplicates: \n${uniqueArr}`)
+    newBoard[0].hands.forEach(hand => {
+      if (hand.valid) console.log(hand)
+    })
 
-    const duplicateArr = removeUniques(sortedVals);
-    console.log(`No Uniques: \n${duplicateArr}`)
+    newBoard[1].hands.forEach(hand => {
+      if (hand.valid) console.log(hand)
+    })
 
     this.setState({ roundOver: true });
   };
