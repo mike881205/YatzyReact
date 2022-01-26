@@ -9,42 +9,54 @@ const blankScoreBoard = [
       {
         name: 'Aces',
         valid: false,
+        remove: false,
         used: false,
+        removed: false,
         value: 1,
         score: 0
       },
       {
         name: 'Twos',
         valid: false,
+        remove: false,
         used: false,
+        removed: false,
         value: 2,
         score: 0
       },
       {
         name: 'Threes',
         valid: false,
+        remove: false,
         used: false,
+        removed: false,
         value: 3,
         score: 0
       },
       {
         name: 'Fours',
         valid: false,
+        remove: false,
         used: false,
+        removed: false,
         value: 4,
         score: 0
       },
       {
         name: 'Fives',
         valid: false,
+        remove: false,
         used: false,
+        removed: false,
         value: 5,
         score: 0
       },
       {
         name: 'Sixes',
         valid: false,
+        remove: false,
         used: false,
+        removed: false,
         value: 6,
         score: 0
       }
@@ -59,48 +71,63 @@ const blankScoreBoard = [
       {
         name: '3 Of A Kind',
         valid: false,
+        remove: false,
         used: false,
+        removed: false,
         score: 0
       },
       {
         name: '4 Of A Kind',
         valid: false,
+        remove: false,
         used: false,
+        removed: false,
         score: 0
       },
       {
         name: 'Full House',
         valid: false,
+        remove: false,
         used: false,
+        removed: false,
         score: 25
       },
       {
         name: 'Small Straight',
         valid: false,
+        remove: false,
         used: false,
+        removed: false,
         score: 30
       },
       {
         name: 'Large Straight',
         valid: false,
+        remove: false,
         used: false,
+        removed: false,
         score: 40
       },
       {
         name: 'Yatzy',
         valid: false,
+        remove: false,
         used: false,
+        removed: false,
         score: 50
       },
       {
         name: 'Chance',
         valid: false,
+        remove: false,
         used: false,
+        removed: false,
         score: 0
       },
       {
         name: 'Yatzy Bonus',
         valid: false,
+        remove: false,
         total: 0,
         score: 100
       }
@@ -129,7 +156,7 @@ const getRandNum = () => {
   const min = Math.ceil(1);
   const max = Math.floor(6);
   return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+};
 
 const removeDuplicates = arr => {
   let seen;
@@ -137,12 +164,6 @@ const removeDuplicates = arr => {
     return seen === val ? '' : seen = val;
   });
   return uniqueArr;
-}
-
-const removeUniques = arr => {
-  var map = new Map();
-  arr.forEach(a => map.set(a, (map.get(a) || 0) + 1));
-  return arr.filter(a => map.get(a) > 1);
 };
 
 const checkTopHands = (objArray, scoreBoard) => {
@@ -164,7 +185,7 @@ const checkStraights = (unqObjArray, scoreBoard) => {
     if (unqObjArray[i] - unqObjArray[i - 1] === 1) { count++ }
     else {
       if (count < 4) { count = 1 };
-    } 
+    }
   };
 
   if (count >= 4) {
@@ -188,58 +209,54 @@ const checkKinds = (sortedArr, objArray, scoreBoard) => {
 
   objArray.forEach(obj => {
     if (obj.count >= 2) {
-      switch(obj.count) {
+      switch (obj.count) {
         case 2:
           FHdouble = true
-        break;
+          break;
         case 3:
           FHtriple = true
-          if (!scoreBoard[1].hands[0].used){
+          if (!scoreBoard[1].hands[0].used) {
             scoreBoard[1].hands[0].valid = true;
             scoreBoard[1].hands[0].score = totalValues(sortedArr);
           };
-        break;
+          break;
         case 4:
-          if (!scoreBoard[1].hands[0].used){
+          if (!scoreBoard[1].hands[0].used) {
             scoreBoard[1].hands[0].valid = true;
             scoreBoard[1].hands[0].score = totalValues(sortedArr);
           };
-          if (!scoreBoard[1].hands[1].used){
+          if (!scoreBoard[1].hands[1].used) {
             scoreBoard[1].hands[1].valid = true;
             scoreBoard[1].hands[1].score = totalValues(sortedArr);
           };
-        break;
+          break;
         default:
-          if (!scoreBoard[1].hands[0].used){
+          if (!scoreBoard[1].hands[0].used) {
             scoreBoard[1].hands[0].valid = true;
             scoreBoard[1].hands[0].score = totalValues(sortedArr);
           };
-          if (!scoreBoard[1].hands[1].used){
+          if (!scoreBoard[1].hands[1].used) {
             scoreBoard[1].hands[1].valid = true;
             scoreBoard[1].hands[1].score = totalValues(sortedArr);
           };
-          if (!scoreBoard[1].hands[5].used){
+          if (!scoreBoard[1].hands[5].used) {
             scoreBoard[1].hands[5].valid = true;
           }
           else {
             scoreBoard[1].hands[7].valid = true;
           };
-        break;
+          break;
       };
     };
   });
 
+  // Check Full House
   if (FHdouble && FHtriple && !scoreBoard[1].hands[2].used) scoreBoard[1].hands[2].valid = true
 
   return scoreBoard;
 };
 
 const checkHands = (sortedArr, scoreBoard) => {
-
-  if (!scoreBoard[1].hands[6].used) {
-    scoreBoard[1].hands[6].valid = true;
-    scoreBoard[1].hands[6].score = totalValues(sortedArr);
-  };
 
   const uniqueVals = removeDuplicates(sortedArr);
 
@@ -251,6 +268,12 @@ const checkHands = (sortedArr, scoreBoard) => {
     return unqObj;
   });
 
+  // Check chance && update scoreboard
+  if (!scoreBoard[1].hands[6].used) {
+    scoreBoard[1].hands[6].valid = true;
+    scoreBoard[1].hands[6].score = totalValues(sortedArr);
+  };
+
   const newBoard1 = checkTopHands(unqObjArray, scoreBoard)
   const newBoard2 = checkStraights(uniqueVals, newBoard1)
   const newBoard3 = checkKinds(sortedArr, unqObjArray, newBoard2)
@@ -258,12 +281,20 @@ const checkHands = (sortedArr, scoreBoard) => {
   return newBoard3;
 };
 
+
+
+
+
+
+
+
 class App extends Component {
 
   state = {
     scoreBoard: null,
     slots: null,
     roll: 0,
+    selectionMade: false,
     roundOver: true,
     gameOver: true
   };
@@ -292,6 +323,30 @@ class App extends Component {
     this.endRound(this.state.slots);
   };
 
+  selectHand = hand => {
+    const { name, score, valid, used, remove, removed } = hand;
+    const scoreBoard = [...this.state.scoreBoard]
+    let topHands = [...scoreBoard[0].hands]
+    let bottomHands = [...scoreBoard[1].hands]
+    let match = false
+
+    topHands.forEach(hand => {
+      if (hand.name === name) {
+        match = true
+        console.log(hand)
+      }
+    })
+
+    if (!match) {
+      bottomHands.forEach(hand => {
+        if (hand.name === name) {
+          console.log(hand)
+        }
+      })
+    }
+
+  };
+
   endRound = slots => {
 
     const scoreBoard = [...this.state.scoreBoard];
@@ -301,18 +356,20 @@ class App extends Component {
 
     const sortedVals = finalVals.sort((a, b) => { return a - b });
     console.log(sortedVals)
-    
+
     const newBoard = checkHands(sortedVals, scoreBoard);
 
-    newBoard[0].hands.forEach(hand => {
-      if (hand.valid) console.log(hand)
-    })
+    // newBoard[0].hands.forEach(hand => {
+    //   if (hand.valid) console.log(hand)
+    // })
+    // newBoard[1].hands.forEach(hand => {
+    //   if (hand.valid) console.log(hand)
+    // })
 
-    newBoard[1].hands.forEach(hand => {
-      if (hand.valid) console.log(hand)
-    })
-
-    this.setState({ roundOver: true });
+    this.setState({
+      roundOver: true,
+      scoreBoard: newBoard
+    });
   };
 
   startRound = e => {
@@ -365,6 +422,7 @@ class App extends Component {
               startGame={this.startGame}
               startRound={this.startRound}
               endRound={this.handleEndRound}
+              selectHand={this.selectHand}
             />
             :
             ''

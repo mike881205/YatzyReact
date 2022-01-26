@@ -9,7 +9,7 @@ const Image = ({ image, roll }) => {
             <Col>
                 {
                     roll === 0 ?
-                        <img src={letter} alt={letter}></img>
+                        <h1>{letter}</h1>
                         :
                         <img src={dice} alt={dice}></img>
                 }
