@@ -1,6 +1,9 @@
 import React, { Component } from "react";
 import Stage from "./Components/Stage";
 import 'bootstrap/dist/css/bootstrap.min.css';
+import GameModal from "./Components/Modal";
+import Button from 'react-bootstrap/Button';
+
 
 const blankScoreBoard = [
   {
@@ -296,12 +299,17 @@ class App extends Component {
     roll: 0,
     selectionMade: false,
     roundOver: true,
-    gameOver: true
+    gameOver: true,
+    showModal: false
   };
 
   componentDidMount() {
     this.resetGame();
-  }
+  };
+
+  toggleModal = bool => {
+    this.setState({ showModal: bool });
+  };
 
   resetGame = () => {
     this.setState({
@@ -325,12 +333,10 @@ class App extends Component {
 
   selectHand = hand => {
     const { name, score, valid, used, remove, removed } = hand;
-    const scoreBoard = [...this.state.scoreBoard]
-    let topHands = [...scoreBoard[0].hands]
-    let bottomHands = [...scoreBoard[1].hands]
+    let scoreBoard = [...this.state.scoreBoard]
     let match = false
 
-    topHands.forEach(hand => {
+    scoreBoard[0].hands.forEach(hand => {
       if (hand.name === name) {
         match = true
         console.log(hand)
@@ -338,7 +344,7 @@ class App extends Component {
     })
 
     if (!match) {
-      bottomHands.forEach(hand => {
+      scoreBoard[1].hands.forEach(hand => {
         if (hand.name === name) {
           console.log(hand)
         }
@@ -427,6 +433,10 @@ class App extends Component {
             :
             ''
         }
+        <GameModal
+          showModal={this.state.showModal}
+          toggleModal={this.toggleModal}
+        />
       </div>
     );
   };
