@@ -8,15 +8,20 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import ScoreBoard from '../ScoreBoard';
 
-const Stage = ({ state, shuffle, holdSlot, startGame, startRound, endRound, selectHand }) => {
-    const { slots, roll, roundOver, gameOver, scoreBoard, selectionMade } = state;
+const Stage = ({ state, shuffle, holdSlot, startGame, startRound, endRound, selectHand, toggleModal }) => {
+    const { slots, roll, roundOver, gameOver, scoreBoard, selectionMade, showModal } = state;
     return (
         <Container className="stage">
             <Row style={{ 'margin': '1%' }}>
                 <Col>
-                    <Slots slots={slots} roll={roll} roundOver={roundOver} holdSlot={holdSlot} />
+                    <Slots
+                        slots={slots}
+                        roll={roll}
+                        roundOver={roundOver}
+                        holdSlot={holdSlot}
+                    />
                     <RollCounter roll={roll} />
-                    <ShuffleBtn click={shuffle} roundOver={roundOver} />
+                    <ShuffleBtn shuffle={shuffle} roundOver={roundOver} />
                     <RoundBtn
                         startGame={startGame}
                         startRound={startRound}
@@ -33,7 +38,9 @@ const Stage = ({ state, shuffle, holdSlot, startGame, startRound, endRound, sele
                 scoreBoard={scoreBoard}
                 roundOver={roundOver}
                 gameOver={gameOver}
+                showModal={showModal}
                 selectHand={selectHand}
+                toggleModal={toggleModal}
             />
         </Container>
     );

@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import Stage from "./Components/Stage";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import GameModal from "./Components/Modal";
+import GameModal from "./Components/GameModal";
 import Button from 'react-bootstrap/Button';
 
 
@@ -170,19 +170,31 @@ const removeDuplicates = arr => {
 };
 
 const checkTopHands = (objArray, scoreBoard) => {
+
+  let validHand = false;
+  let obj = {};
+
   objArray.forEach(obj => {
     scoreBoard[0].hands.forEach(hand => {
       if (obj.value === hand.value && !hand.used) {
+        validHand = true;
         hand.valid = true;
         hand.score = hand.value * obj.count;
       };
     });
   });
-  return scoreBoard;
+
+  obj.validHand = validHand;
+  obj.scoreBoard = scoreBoard;
+
+  return obj;
 };
 
 const checkStraights = (unqObjArray, scoreBoard) => {
+
   let count = 1;
+  let validHand = false;
+  let obj = {};
 
   for (let i = 1; i < unqObjArray.length; i++) {
     if (unqObjArray[i] - unqObjArray[i - 1] === 1) { count++ }
@@ -194,21 +206,36 @@ const checkStraights = (unqObjArray, scoreBoard) => {
   if (count >= 4) {
     switch (count) {
       case 4:
-        if (!scoreBoard[1].hands[3].used) scoreBoard[1].hands[3].valid = true;
+        if (!scoreBoard[1].hands[3].used) {
+          validHand = true
+          scoreBoard[1].hands[3].valid = true
+        };
         break;
       default:
-        if (!scoreBoard[1].hands[3].used) scoreBoard[1].hands[3].valid = true;
-        if (!scoreBoard[1].hands[4].used) scoreBoard[1].hands[4].valid = true;
+        if (!scoreBoard[1].hands[3].used) {
+          validHand = true
+          scoreBoard[1].hands[3].valid = true
+        };
+        if (!scoreBoard[1].hands[4].used) {
+          validHand = true
+          scoreBoard[1].hands[4].valid = true
+        };
         break;
     };
   };
 
-  return scoreBoard;
+  obj.validHand = validHand;
+  obj.scoreBoard = scoreBoard;
+
+  return obj;
 };
 
 const checkKinds = (sortedArr, objArray, scoreBoard) => {
+
   let FHdouble = false;
   let FHtriple = false;
+  let validHand = false;
+  let obj = {};
 
   objArray.forEach(obj => {
     if (obj.count >= 2) {
@@ -219,33 +246,40 @@ const checkKinds = (sortedArr, objArray, scoreBoard) => {
         case 3:
           FHtriple = true
           if (!scoreBoard[1].hands[0].used) {
+            validHand = true
             scoreBoard[1].hands[0].valid = true;
             scoreBoard[1].hands[0].score = totalValues(sortedArr);
           };
           break;
         case 4:
           if (!scoreBoard[1].hands[0].used) {
+            validHand = true
             scoreBoard[1].hands[0].valid = true;
             scoreBoard[1].hands[0].score = totalValues(sortedArr);
           };
           if (!scoreBoard[1].hands[1].used) {
+            validHand = true
             scoreBoard[1].hands[1].valid = true;
             scoreBoard[1].hands[1].score = totalValues(sortedArr);
           };
           break;
         default:
           if (!scoreBoard[1].hands[0].used) {
+            validHand = true
             scoreBoard[1].hands[0].valid = true;
             scoreBoard[1].hands[0].score = totalValues(sortedArr);
           };
           if (!scoreBoard[1].hands[1].used) {
+            validHand = true
             scoreBoard[1].hands[1].valid = true;
             scoreBoard[1].hands[1].score = totalValues(sortedArr);
           };
           if (!scoreBoard[1].hands[5].used) {
+            validHand = true
             scoreBoard[1].hands[5].valid = true;
           }
           else {
+            validHand = true
             scoreBoard[1].hands[7].valid = true;
           };
           break;
@@ -254,14 +288,23 @@ const checkKinds = (sortedArr, objArray, scoreBoard) => {
   });
 
   // Check Full House
-  if (FHdouble && FHtriple && !scoreBoard[1].hands[2].used) scoreBoard[1].hands[2].valid = true
+  if (FHdouble && FHtriple && !scoreBoard[1].hands[2].used) {
+    validHand = true
+    scoreBoard[1].hands[2].valid = true
+  };
 
-  return scoreBoard;
+  obj.validHand = validHand;
+  obj.scoreBoard = scoreBoard;
+
+  return obj;
 };
 
-const checkHands = (sortedArr, scoreBoard) => {
+const findHands = (sortedArr, scoreBoard) => {
 
   const uniqueVals = removeDuplicates(sortedArr);
+  
+  let validHands = false;
+  let newBoard;
 
   const unqObjArray = uniqueVals.map(unqVal => {
     let unqObj = { value: unqVal, count: 0 };
@@ -273,15 +316,29 @@ const checkHands = (sortedArr, scoreBoard) => {
 
   // Check chance && update scoreboard
   if (!scoreBoard[1].hands[6].used) {
+    validHands = true;
     scoreBoard[1].hands[6].valid = true;
     scoreBoard[1].hands[6].score = totalValues(sortedArr);
   };
 
-  const newBoard1 = checkTopHands(unqObjArray, scoreBoard)
-  const newBoard2 = checkStraights(uniqueVals, newBoard1)
-  const newBoard3 = checkKinds(sortedArr, unqObjArray, newBoard2)
+  const topHandObj = checkTopHands(unqObjArray, scoreBoard);
+  const straightObj = checkStraights(uniqueVals, topHandObj.scoreBoard);
+  let kindObj = checkKinds(sortedArr, unqObjArray, straightObj.scoreBoard);
 
-  return newBoard3;
+  if (topHandObj.validHand || straightObj.validHand || kindObj.validHand ) validHands = true;
+
+  if (!validHands) {
+    kindObj.scoreBoard[0].hands.forEach(hand => {
+      if (!hand.used) hand.remove = true;
+    });
+    kindObj.scoreBoard[0].hands.forEach(hand => {
+      if (!hand.used) hand.remove = true;
+    });
+  };
+
+  newBoard = kindObj.scoreBoard;
+
+  return newBoard;
 };
 
 
@@ -298,6 +355,7 @@ class App extends Component {
     slots: null,
     roll: 0,
     selectionMade: false,
+    selectedHand: null,
     roundOver: true,
     gameOver: true,
     showModal: false
@@ -307,8 +365,12 @@ class App extends Component {
     this.resetGame();
   };
 
-  toggleModal = bool => {
-    this.setState({ showModal: bool });
+  toggleModal = obj => {
+    const { toggle, hand } = obj
+    this.setState({
+      showModal: toggle,
+      selectedHand: hand
+    });
   };
 
   resetGame = () => {
@@ -316,19 +378,19 @@ class App extends Component {
       scoreBoard: blankScoreBoard,
       slots: blankArr,
       roundOver: true,
-      gameOver: true
+      gameOver: true,
+      roll: 0,
+      selectionMade: false,
+      selectedHand: { toggle: false, hand: null },
+      showModal: false
     });
   };
 
-  startGame = e => {
+  startGame = () => {
     this.setState({
       gameOver: false,
       roundOver: false
     });
-  };
-
-  handleEndRound = e => {
-    this.endRound(this.state.slots);
   };
 
   selectHand = hand => {
@@ -336,41 +398,45 @@ class App extends Component {
     let scoreBoard = [...this.state.scoreBoard]
     let match = false
 
-    scoreBoard[0].hands.forEach(hand => {
-      if (hand.name === name) {
-        match = true
-        console.log(hand)
-      }
-    })
+    scoreBoard[0].hands.forEach(tophand => {
+      if (tophand.name === name) {
+        match = true;
+        console.log(`Match:`)
+        console.log(tophand)
+      };
+    });
 
     if (!match) {
-      scoreBoard[1].hands.forEach(hand => {
-        if (hand.name === name) {
-          console.log(hand)
-        }
-      })
-    }
+      scoreBoard[1].hands.forEach(btmHand => {
+        if (btmHand.name === name) {
+          match = true;
+          console.log(`Match:`)
+          console.log(btmHand)
+        };
+      });
+    };
 
   };
 
-  endRound = slots => {
+  endRound = () => {
 
     const scoreBoard = [...this.state.scoreBoard];
+    const slots = this.state.slots;
 
     const finalVals = slots.map(slot => { return slot.number });
-    // let finalVals = [1,1,1,6,6]
+    // let finalVals = [4,1,1,4,4]
 
     const sortedVals = finalVals.sort((a, b) => { return a - b });
     console.log(sortedVals)
 
-    const newBoard = checkHands(sortedVals, scoreBoard);
+    const newBoard = findHands(sortedVals, scoreBoard);
 
-    // newBoard[0].hands.forEach(hand => {
-    //   if (hand.valid) console.log(hand)
-    // })
-    // newBoard[1].hands.forEach(hand => {
-    //   if (hand.valid) console.log(hand)
-    // })
+    newBoard[0].hands.forEach(hand => {
+      if (hand.valid) console.log(hand)
+    })
+    newBoard[1].hands.forEach(hand => {
+      if (hand.valid) console.log(hand)
+    })
 
     this.setState({
       roundOver: true,
@@ -378,7 +444,7 @@ class App extends Component {
     });
   };
 
-  startRound = e => {
+  startRound = () => {
     this.setState({
       slots: blankArr,
       roll: 0,
@@ -393,27 +459,20 @@ class App extends Component {
     this.setState({ slots: slots });
   };
 
-  handleShuffle = e => {
-    e.preventDefault();
-    this.shuffle(this.state.slots);
-  };
-
-  shuffle = slots => {
-    let roll = this.state.roll
-    const newSlots = slots.map(slot => {
-      let newSlot = {};
-      !slot.held ? newSlot.number = getRandNum() : newSlot.number = slot.number;
-      newSlot.held = slot.held;
-      return newSlot;
+  shuffle = () => {
+    let slots = [...this.state.slots];
+    let roll = this.state.roll;
+    slots.forEach(slot => {
+      if (!slot.held) slot.number = getRandNum()
     });
 
     roll++
 
     if (roll === 3) {
-      this.endRound(newSlots);
+      this.endRound(slots);
     };
 
-    this.setState({ roll: roll, slots: newSlots });
+    this.setState({ roll: roll, slots: slots });
   };
 
   render() {
@@ -423,18 +482,21 @@ class App extends Component {
           this.state.slots ?
             <Stage
               state={this.state}
-              shuffle={this.handleShuffle}
+              shuffle={this.shuffle}
               holdSlot={this.holdSlot}
               startGame={this.startGame}
               startRound={this.startRound}
-              endRound={this.handleEndRound}
+              endRound={this.endRound}
               selectHand={this.selectHand}
+              toggleModal={this.toggleModal}
             />
             :
             ''
         }
         <GameModal
+          selectedHand={this.state.selectedHand !== null ? this.state.selectedHand : ''}
           showModal={this.state.showModal}
+          selectHand={this.selectHand}
           toggleModal={this.toggleModal}
         />
       </div>

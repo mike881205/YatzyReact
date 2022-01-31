@@ -2,12 +2,13 @@ import React from 'react';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 
-const HandRow = ({ id, hand, roundOver, click, gameOver, roll, selectHand }) => {
-    const { name, score, valid, used, remove, removed } = hand
+const HandRow = ({ id, hand, roundOver, gameOver, roll, showModal, selectHand, toggleModal }) => {
+
+    const { name, score, valid, used, remove, removed } = hand;
 
     const handleClick = e => {
         e.preventDefault();
-        if (!e.currentTarget.className.includes('disabled')) selectHand(hand);
+        if (!e.currentTarget.className.includes('disabled')) toggleModal({ toggle: true, hand: hand });
     };
 
     return (

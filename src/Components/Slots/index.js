@@ -43,7 +43,7 @@ const Slots = ({ roll, slots, roundOver, holdSlot }) => {
                             held={slot.held}
                             roundOver={roundOver}
                             roll={roll}
-                            click={holdSlot}
+                            holdSlot={holdSlot}
                         />;
                     return slotChild;
                 })
