@@ -7,6 +7,8 @@ const ScoreBoard = ({ scoreBoard, roll, roundOver, gameOver, showModal, toggleMo
 
     const topHands = [...scoreBoard[0].hands];
     const bottomHands = [...scoreBoard[1].hands];
+    const topScore = scoreBoard[0].handsTotal;
+    const bottomScore = scoreBoard[1].handsTotal;
 
     return (
         <>
@@ -31,7 +33,7 @@ const ScoreBoard = ({ scoreBoard, roll, roundOver, gameOver, showModal, toggleMo
                     <HandRow
                         key={'top total'}
                         id={'top total'}
-                        hand={{ name: 'Top Total', score: 'Top total', valid: 'total' }}
+                        hand={{ name: 'Top Total', score: topScore, valid: 'total' }}
                     />
                 </Col>
                 <Col style={{ 'margin': '1%' }}>
@@ -54,14 +56,14 @@ const ScoreBoard = ({ scoreBoard, roll, roundOver, gameOver, showModal, toggleMo
                     <HandRow
                         key={'bottom total'}
                         id={'bottom total'}
-                        hand={{ name: 'Bottom Total', score: 'Bottom total', valid: 'total' }}
+                        hand={{ name: 'Bottom Total', score: bottomScore, valid: 'total' }}
                     />
                 </Col>
             </Row>
             <HandRow
                 key={'grand total'}
                 id={'grand total'}
-                hand={{ name: 'Grand Total', score: 'Grand total', valid: 'total' }}
+                hand={{ name: 'Grand Total', score: topScore + bottomScore, valid: 'total' }}
             />
         </>
     );

@@ -39,6 +39,7 @@ const Slots = ({ roll, slots, roundOver, holdSlot }) => {
                         <Slot
                             key={i}
                             id={i}
+                            number={slot.number}
                             image={roll === 0 ? imgArr[i]: imgArr[slot.number - 1]}
                             held={slot.held}
                             roundOver={roundOver}

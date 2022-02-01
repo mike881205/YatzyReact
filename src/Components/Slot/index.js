@@ -4,7 +4,7 @@ import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button'
 import Image from '../Image';
 
-const Slot = ({ roll, image, held, holdSlot, id, roundOver }) => {
+const Slot = ({ roll, image, held, holdSlot, id, roundOver, number }) => {
 
     const handleClick = e => {
         e.preventDefault();
@@ -13,6 +13,11 @@ const Slot = ({ roll, image, held, holdSlot, id, roundOver }) => {
 
     return (
         <Col className="slot" style={{ 'margin': '1%' }}>
+            {/* <Row style={{ 'margin': '1%' }}>
+                <Col>
+                <h1>{number}</h1>
+                </Col>
+            </Row> */}
             <Image image={image} roll={roll} />
             <Row style={{ 'margin': '1%' }}>
                 <Col>

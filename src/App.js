@@ -315,25 +315,25 @@ const findHands = (sortedArr, scoreBoard) => {
     return unqObj;
   });
 
+  // Check chance && update scoreboard
+  if (!scoreBoard[1].hands[6].used && !scoreBoard[1].hands[6].removed) {
+    validHands = true;
+    scoreBoard[1].hands[6].valid = true;
+    scoreBoard[1].hands[6].score = totalValues(sortedArr);
+  };
+
   const topHandObj = checkTopHands(unqObjArray, scoreBoard);
   const straightObj = checkStraights(uniqueVals, topHandObj.scoreBoard);
   let kindObj = checkKinds(sortedArr, unqObjArray, straightObj.scoreBoard);
 
   if (topHandObj.validHand || straightObj.validHand || kindObj.validHand) validHands = true;
 
-  // Check chance && update scoreboard
-  if (!scoreBoard[1].hands[6].used) {
-    validHands = true;
-    scoreBoard[1].hands[6].valid = true;
-    scoreBoard[1].hands[6].score = totalValues(sortedArr);
-  };
-
   if (!validHands) {
     kindObj.scoreBoard[0].hands.forEach(hand => {
-      if (!hand.used) hand.remove = true;
+      if (!hand.used && !hand.removed) hand.remove = true;
     });
-    kindObj.scoreBoard[0].hands.forEach(hand => {
-      if (!hand.used) hand.remove = true;
+    kindObj.scoreBoard[1].hands.forEach(hand => {
+      if (!hand.used && !hand.removed) hand.remove = true;
     });
   };
 
@@ -403,68 +403,8 @@ class App extends Component {
       roll: 0,
       roundOver: false,
       selectionMade: false,
-      selectedHand: { toggle: false, hand: null },
-      noValid: false
+      selectedHand: { toggle: false, hand: null }
     });
-  };
-
-  selectHand = hand => {
-    const { name, score } = hand;
-    let scoreBoard = [...this.state.scoreBoard]
-    let match = false
-    let count = 0
-
-    // Check the top hands for the selection
-    scoreBoard[0].hands.forEach(topHand => {
-      if (topHand.name === name) {
-        match = true;
-        if (!this.state.noValid) {
-          topHand.used = true;
-          console.log(`Valid: ${topHand.name}`)
-        }
-        else {
-          topHand.removed = true;
-          console.log(`removed: ${topHand.name}`)
-        }
-      };
-      if (!topHand.used && !topHand.removed) count++;
-      !this.state.noValid ? topHand.valid = false : topHand.remove = false;
-    });
-
-    // If no top hand matches, check the bottom hands for the selection
-    if (!match) {
-      scoreBoard[1].hands.forEach(btmHand => {
-        if (btmHand.name === name) {
-          if (!this.state.noValid) {
-            btmHand.used = true;
-            console.log(`Valid: ${btmHand.name}`)
-          }
-          else {
-            btmHand.removed = true;
-            console.log(`removed: ${btmHand.name}`)
-          };
-        };
-        if (!btmHand.used && !btmHand.removed) count++;
-        !this.state.noValid ? btmHand.valid = false : btmHand.remove = false;
-      });
-    };
-
-    switch (count) {
-      case 0:
-        // this.endGame();
-        this.setState({
-          scoreBoard: scoreBoard,
-          selectionMade: true
-        });
-        alert("Game Over")
-        break;
-      default:
-        this.setState({
-          scoreBoard: scoreBoard,
-          selectionMade: true
-        });
-        break;
-    };
   };
 
   endRound = () => {
@@ -473,6 +413,17 @@ class App extends Component {
     const sortedVals = finalVals.sort((a, b) => { return a - b });
     console.log(sortedVals)
     const boardObj = findHands(sortedVals, scoreBoard);
+
+    const hands = [...boardObj.scoreBoard[0].hands, ...boardObj.scoreBoard[1].hands]
+    hands.forEach(hand => {
+      const { name, remove, valid } = hand
+      if (remove || valid) {
+        console.log(name)
+        console.log(`remove: ${remove}`)
+        console.log(`valid: ${valid}`)
+        console.log("====================")
+      }
+    })
 
     if (!boardObj.validHands) this.setState({ noValid: true });
 
@@ -499,6 +450,74 @@ class App extends Component {
 
     if (roll === 3) this.endRound();
     else this.setState({ roll: roll, slots: slots });
+  };
+
+  selectHand = hand => {
+    const { name, score } = hand;
+    let scoreBoard = [...this.state.scoreBoard]
+    let match = false
+    let count = 0
+    let hands;
+
+    // Check the top hands for the selection
+    scoreBoard[0].hands.forEach(topHand => {
+      if (topHand.name === name) {
+        match = true;
+        if (!this.state.noValid) {
+          topHand.used = true;
+          scoreBoard[0].handsTotal = scoreBoard[0].handsTotal + topHand.score;
+          console.log(`Valid: ${topHand.name}`)
+        }
+        else {
+          topHand.removed = true;
+          console.log(`removed: ${topHand.name}`)
+        }
+      };
+      !this.state.noValid ? topHand.valid = false : topHand.remove = false;
+    });
+
+    // If no top hand matches, check the bottom hands for the selection
+    if (!match) {
+      scoreBoard[1].hands.forEach(btmHand => {
+        if (btmHand.name === name) {
+          if (!this.state.noValid) {
+            btmHand.used = true;
+            scoreBoard[1].handsTotal = scoreBoard[1].handsTotal + btmHand.score;
+            console.log(`Valid: ${btmHand.name}`)
+          }
+          else {
+            btmHand.removed = true;
+            console.log(`removed: ${btmHand.name}`)
+          };
+        };
+        !this.state.noValid ? btmHand.valid = false : btmHand.remove = false;
+      });
+    };
+
+    hands = [...scoreBoard[0].hands, ...scoreBoard[1].hands];
+
+    hands.forEach(hand => { if (!hand.used && !hand.removed) count++; });
+
+    switch (count) {
+      case 0:
+        // this.endGame();
+        this.setState({
+          gameOver: true,
+          scoreBoard: scoreBoard,
+          selectionMade: true,
+          noValid: false
+
+        });
+        alert("Game Over")
+        break;
+      default:
+        this.setState({
+          scoreBoard: scoreBoard,
+          selectionMade: true,
+          noValid: false
+        });
+        break;
+    };
   };
 
   render() {
