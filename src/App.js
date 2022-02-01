@@ -142,18 +142,13 @@ const blankScoreBoard = [
   }
 ]
 
+const letters = Array.from('YATZY');
+
+// const blankSlotArr = letters.map((letter) => { return { number: letter, held: false } });
+
 const totalValues = handArr => {
   return handArr.reduce((a, b) => a + b);
 };
-
-const letters = Array.from("YATZY");
-
-const blankArr = letters.map(slot => {
-  return {
-    number: slot,
-    held: false
-  };
-});
 
 const getRandNum = () => {
   const min = Math.ceil(1);
@@ -360,7 +355,8 @@ class App extends Component {
     roundOver: true,
     gameOver: true,
     showModal: false,
-    noValid: false
+    noValid: false,
+    loaded: false
   };
 
   componentDidMount() {
@@ -377,22 +373,167 @@ class App extends Component {
 
   resetGame = () => {
     this.setState({
-      scoreBoard: blankScoreBoard,
-      slots: blankArr,
+      scoreBoard: [
+        {
+          section: 'top',
+          hands: [
+            {
+              name: 'Aces',
+              valid: false,
+              remove: false,
+              used: false,
+              removed: false,
+              value: 1,
+              score: 0
+            },
+            {
+              name: 'Twos',
+              valid: false,
+              remove: false,
+              used: false,
+              removed: false,
+              value: 2,
+              score: 0
+            },
+            {
+              name: 'Threes',
+              valid: false,
+              remove: false,
+              used: false,
+              removed: false,
+              value: 3,
+              score: 0
+            },
+            {
+              name: 'Fours',
+              valid: false,
+              remove: false,
+              used: false,
+              removed: false,
+              value: 4,
+              score: 0
+            },
+            {
+              name: 'Fives',
+              valid: false,
+              remove: false,
+              used: false,
+              removed: false,
+              value: 5,
+              score: 0
+            },
+            {
+              name: 'Sixes',
+              valid: false,
+              remove: false,
+              used: false,
+              removed: false,
+              value: 6,
+              score: 0
+            }
+          ],
+          handsTotal: 0,
+          bonus: () => { return this.handsTotal < 63 ? 0 : 35 },
+          total: () => { return this.handsTotal + this.bonus() }
+        },
+        {
+          section: 'bottom',
+          hands: [
+            {
+              name: '3 Of A Kind',
+              valid: false,
+              remove: false,
+              used: false,
+              removed: false,
+              score: 0
+            },
+            {
+              name: '4 Of A Kind',
+              valid: false,
+              remove: false,
+              used: false,
+              removed: false,
+              score: 0
+            },
+            {
+              name: 'Full House',
+              valid: false,
+              remove: false,
+              used: false,
+              removed: false,
+              score: 25
+            },
+            {
+              name: 'Small Straight',
+              valid: false,
+              remove: false,
+              used: false,
+              removed: false,
+              score: 30
+            },
+            {
+              name: 'Large Straight',
+              valid: false,
+              remove: false,
+              used: false,
+              removed: false,
+              score: 40
+            },
+            {
+              name: 'Yatzy',
+              valid: false,
+              remove: false,
+              used: false,
+              removed: false,
+              score: 50
+            },
+            {
+              name: 'Chance',
+              valid: false,
+              remove: false,
+              used: false,
+              removed: false,
+              score: 0
+            },
+            {
+              name: 'Yatzy Bonus',
+              valid: false,
+              remove: false,
+              total: 0,
+              score: 100
+            }
+          ],
+          handsTotal: 0
+        },
+        {
+          grandTotal: 0
+        }
+      ],
+      slots: letters.map((letter) => { return { number: letter, held: false } }),
       roundOver: true,
       gameOver: true,
       roll: 0,
       selectionMade: false,
       selectedHand: { toggle: false, hand: null },
       showModal: false,
-      noValid: false
+      noValid: false,
+      loaded: true
     });
   };
 
   startGame = () => {
+    this.setState({ gameOver: false });
+    this.startRound();
+  };
+
+  startRound = () => {
     this.setState({
-      gameOver: false,
-      roundOver: false
+      slots: letters.map((letter) => {return {number: letter, held: false}}),
+      roll: 0,
+      roundOver: false,
+      selectionMade: false,
+      selectedHand: { toggle: false, hand: null },
+      noValid: false
     });
   };
 
@@ -436,15 +577,14 @@ class App extends Component {
     };
 
     this.setState({
-      scoreBoard: scoreBoard,
+      scoreBoard: [...scoreBoard],
       selectionMade: true
     })
   };
 
   endRound = () => {
-
     const scoreBoard = [...this.state.scoreBoard];
-    const slots = this.state.slots;
+    const slots = [...this.state.slots];
     const finalVals = slots.map(slot => { return slot.number });
     const sortedVals = finalVals.sort((a, b) => { return a - b });
     console.log(sortedVals)
@@ -454,46 +594,34 @@ class App extends Component {
 
     this.setState({
       roundOver: true,
-      scoreBoard: boardObj.scoreBoard
-    });
-  };
-
-  startRound = () => {
-    this.setState({
-      slots: blankArr,
-      roll: 0,
-      roundOver: false
+      scoreBoard: [...boardObj.scoreBoard]
     });
   };
 
   holdSlot = e => {
     const id = e.target.id;
-    const slots = this.state.slots;
+    let slots = [...this.state.slots];
     slots[id].held ? slots[id].held = false : slots[id].held = true;
-    this.setState({ slots: slots });
+    this.setState({ slots: [...slots] });
   };
 
   shuffle = () => {
     let slots = [...this.state.slots];
     let roll = this.state.roll;
-    slots.forEach(slot => {
-      if (!slot.held) slot.number = getRandNum()
-    });
 
-    roll++
+    slots.forEach(slot => { if (!slot.held) slot.number = getRandNum(); });
 
-    if (roll === 3) {
-      this.endRound(slots);
-    };
+    roll++;
 
-    this.setState({ roll: roll, slots: slots });
+    if (roll === 3) this.endRound(slots);
+    else this.setState({ roll: roll, slots: [...slots] });
   };
 
   render() {
     return (
       <div className="App" align="center">
         {
-          this.state.slots ?
+          this.state.loaded ?
             <Stage
               state={this.state}
               shuffle={this.shuffle}

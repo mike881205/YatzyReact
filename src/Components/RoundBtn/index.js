@@ -7,7 +7,7 @@ const RoundBtn = ({ roll, startGame, startRound, endRound, roundOver, gameOver, 
 
     const handleClick = e => {
         e.preventDefault();
-        gameOver ? startGame() : !roundOver ? endRound() : startRound()
+        gameOver ? startGame() : roundOver ? startRound() : endRound()
     };
 
     return (
