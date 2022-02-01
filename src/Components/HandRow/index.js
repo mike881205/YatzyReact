@@ -14,7 +14,8 @@ const HandRow = ({ id, hand, roundOver, gameOver, roll, showModal, selectHand, t
     return (
         <Row
             className={
-                removed ? "btn-dark disabled" :
+                valid === 'total' ? 'btn-dark disabled' :
+                removed ? "btn-secondary disabled" :
                     used ? "btn-success disabled" :
                         roundOver && valid ? "btn-warning" :
                             roundOver && remove ? "btn-danger" :

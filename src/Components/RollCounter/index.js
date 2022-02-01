@@ -6,7 +6,7 @@ const RollCounter = ({ roll }) => {
     return (
         <Row className="rollCounter" style={{'margin': '1%'}}>
             <Col>
-                {`Roll: ${roll}`}
+            <h5>{`Roll: ${roll}`}</h5>
             </Col>
         </Row>
     )

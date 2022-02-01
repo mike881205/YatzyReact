@@ -21,18 +21,38 @@ const Stage = ({ state, shuffle, holdSlot, startGame, startRound, endRound, sele
                         holdSlot={holdSlot}
                     />
                     <RollCounter roll={roll} />
-                    <ShuffleBtn shuffle={shuffle} roundOver={roundOver} />
-                    <RoundBtn
-                        startGame={startGame}
-                        startRound={startRound}
-                        endRound={endRound}
-                        roll={roll}
-                        roundOver={roundOver}
-                        gameOver={gameOver}
-                        selectionMade={selectionMade}
-                    />
+
+                    {
+                        !roundOver && !gameOver ?
+                            < Row style={{ 'margin': '1%' }}>
+                                <Col>
+                                    <ShuffleBtn shuffle={shuffle} roundOver={roundOver} />
+                                </Col>
+                                <Col>
+                                    <RoundBtn
+                                        startGame={startGame}
+                                        startRound={startRound}
+                                        endRound={endRound}
+                                        roll={roll}
+                                        roundOver={roundOver}
+                                        gameOver={gameOver}
+                                        selectionMade={selectionMade}
+                                    />
+                                </Col>
+                            </Row>
+                            :
+                            <RoundBtn
+                                startGame={startGame}
+                                startRound={startRound}
+                                endRound={endRound}
+                                roll={roll}
+                                roundOver={roundOver}
+                                gameOver={gameOver}
+                                selectionMade={selectionMade}
+                            />
+                    }
                 </Col>
-            </Row>
+            </Row >
             <ScoreBoard
                 roll={roll}
                 scoreBoard={scoreBoard}
@@ -42,7 +62,7 @@ const Stage = ({ state, shuffle, holdSlot, startGame, startRound, endRound, sele
                 selectHand={selectHand}
                 toggleModal={toggleModal}
             />
-        </Container>
+        </Container >
     );
 };
 
