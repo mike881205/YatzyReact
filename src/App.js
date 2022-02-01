@@ -176,7 +176,7 @@ const checkTopHands = (objArray, scoreBoard) => {
 
   objArray.forEach(obj => {
     scoreBoard[0].hands.forEach(hand => {
-      if (obj.value === hand.value && !hand.used) {
+      if (obj.value === hand.value && !hand.used && !hand.removed) {
         validHand = true;
         hand.valid = true;
         hand.score = hand.value * obj.count;
@@ -206,17 +206,17 @@ const checkStraights = (unqObjArray, scoreBoard) => {
   if (count >= 4) {
     switch (count) {
       case 4:
-        if (!scoreBoard[1].hands[3].used) {
+        if (!scoreBoard[1].hands[3].used && !scoreBoard[1].hands[3].removed) {
           validHand = true
           scoreBoard[1].hands[3].valid = true
         };
         break;
       default:
-        if (!scoreBoard[1].hands[3].used) {
+        if (!scoreBoard[1].hands[3].used && !scoreBoard[1].hands[3].removed) {
           validHand = true
           scoreBoard[1].hands[3].valid = true
         };
-        if (!scoreBoard[1].hands[4].used) {
+        if (!scoreBoard[1].hands[4].used && !scoreBoard[1].hands[4].removed) {
           validHand = true
           scoreBoard[1].hands[4].valid = true
         };
@@ -245,40 +245,40 @@ const checkKinds = (sortedArr, objArray, scoreBoard) => {
           break;
         case 3:
           FHtriple = true
-          if (!scoreBoard[1].hands[0].used) {
+          if (!scoreBoard[1].hands[0].used && !scoreBoard[1].hands[0].removed) {
             validHand = true
             scoreBoard[1].hands[0].valid = true;
             scoreBoard[1].hands[0].score = totalValues(sortedArr);
           };
           break;
         case 4:
-          if (!scoreBoard[1].hands[0].used) {
+          if (!scoreBoard[1].hands[0].used && !scoreBoard[1].hands[0].removed) {
             validHand = true
             scoreBoard[1].hands[0].valid = true;
             scoreBoard[1].hands[0].score = totalValues(sortedArr);
           };
-          if (!scoreBoard[1].hands[1].used) {
+          if (!scoreBoard[1].hands[1].used && !scoreBoard[1].hands[1].removed) {
             validHand = true
             scoreBoard[1].hands[1].valid = true;
             scoreBoard[1].hands[1].score = totalValues(sortedArr);
           };
           break;
         default:
-          if (!scoreBoard[1].hands[0].used) {
+          if (!scoreBoard[1].hands[0].used && !scoreBoard[1].hands[0].removed) {
             validHand = true
             scoreBoard[1].hands[0].valid = true;
             scoreBoard[1].hands[0].score = totalValues(sortedArr);
           };
-          if (!scoreBoard[1].hands[1].used) {
+          if (!scoreBoard[1].hands[1].used && !scoreBoard[1].hands[1].removed) {
             validHand = true
             scoreBoard[1].hands[1].valid = true;
             scoreBoard[1].hands[1].score = totalValues(sortedArr);
           };
-          if (!scoreBoard[1].hands[5].used) {
+          if (!scoreBoard[1].hands[5].used && !scoreBoard[1].hands[5].removed) {
             validHand = true
             scoreBoard[1].hands[5].valid = true;
           }
-          else {
+          else if (!scoreBoard[1].hands[5].removed) {
             validHand = true
             scoreBoard[1].hands[7].valid = true;
           };
@@ -302,9 +302,9 @@ const checkKinds = (sortedArr, objArray, scoreBoard) => {
 const findHands = (sortedArr, scoreBoard) => {
 
   const uniqueVals = removeDuplicates(sortedArr);
-  
+
   let validHands = false;
-  let newBoard;
+  let obj = {};
 
   const unqObjArray = uniqueVals.map(unqVal => {
     let unqObj = { value: unqVal, count: 0 };
@@ -314,18 +314,18 @@ const findHands = (sortedArr, scoreBoard) => {
     return unqObj;
   });
 
+  const topHandObj = checkTopHands(unqObjArray, scoreBoard);
+  const straightObj = checkStraights(uniqueVals, topHandObj.scoreBoard);
+  let kindObj = checkKinds(sortedArr, unqObjArray, straightObj.scoreBoard);
+
+  if (topHandObj.validHand || straightObj.validHand || kindObj.validHand) validHands = true;
+
   // Check chance && update scoreboard
   if (!scoreBoard[1].hands[6].used) {
     validHands = true;
     scoreBoard[1].hands[6].valid = true;
     scoreBoard[1].hands[6].score = totalValues(sortedArr);
   };
-
-  const topHandObj = checkTopHands(unqObjArray, scoreBoard);
-  const straightObj = checkStraights(uniqueVals, topHandObj.scoreBoard);
-  let kindObj = checkKinds(sortedArr, unqObjArray, straightObj.scoreBoard);
-
-  if (topHandObj.validHand || straightObj.validHand || kindObj.validHand ) validHands = true;
 
   if (!validHands) {
     kindObj.scoreBoard[0].hands.forEach(hand => {
@@ -336,9 +336,10 @@ const findHands = (sortedArr, scoreBoard) => {
     });
   };
 
-  newBoard = kindObj.scoreBoard;
+  obj.scoreBoard = kindObj.scoreBoard;
+  obj.validHands = validHands;
 
-  return newBoard;
+  return obj;
 };
 
 
@@ -355,10 +356,11 @@ class App extends Component {
     slots: null,
     roll: 0,
     selectionMade: false,
-    selectedHand: null,
+    selectedHand: { toggle: false, hand: null },
     roundOver: true,
     gameOver: true,
-    showModal: false
+    showModal: false,
+    noValid: false
   };
 
   componentDidMount() {
@@ -382,7 +384,8 @@ class App extends Component {
       roll: 0,
       selectionMade: false,
       selectedHand: { toggle: false, hand: null },
-      showModal: false
+      showModal: false,
+      noValid: false
     });
   };
 
@@ -398,49 +401,60 @@ class App extends Component {
     let scoreBoard = [...this.state.scoreBoard]
     let match = false
 
-    scoreBoard[0].hands.forEach(tophand => {
-      if (tophand.name === name) {
+    scoreBoard[0].hands.forEach(topHand => {
+      if (topHand.name === name) {
         match = true;
-        console.log(`Match:`)
-        console.log(tophand)
+        if (!this.state.noValid) {
+          topHand.used = true;
+          console.log(`Valid: ${topHand.name}`)
+        }
+        else {
+          topHand.removed = true;
+          console.log(`removed: ${topHand.name}`)
+        }
       };
+
+      !this.state.noValid ? topHand.valid = false : topHand.remove = false
     });
 
     if (!match) {
       scoreBoard[1].hands.forEach(btmHand => {
         if (btmHand.name === name) {
-          match = true;
-          console.log(`Match:`)
-          console.log(btmHand)
+          // match = true;
+          if (!this.state.noValid) {
+            btmHand.used = true;
+            console.log(`Valid: ${btmHand.name}`)
+          }
+          else {
+            btmHand.removed = true;
+            console.log(`removed: ${btmHand.name}`)
+          };
         };
+
+        !this.state.noValid ? btmHand.valid = false : btmHand.remove = false;
       });
     };
 
+    this.setState({
+      scoreBoard: scoreBoard,
+      selectionMade: true
+    })
   };
 
   endRound = () => {
 
     const scoreBoard = [...this.state.scoreBoard];
     const slots = this.state.slots;
-
     const finalVals = slots.map(slot => { return slot.number });
-    // let finalVals = [4,1,1,4,4]
-
     const sortedVals = finalVals.sort((a, b) => { return a - b });
     console.log(sortedVals)
+    const boardObj = findHands(sortedVals, scoreBoard);
 
-    const newBoard = findHands(sortedVals, scoreBoard);
-
-    newBoard[0].hands.forEach(hand => {
-      if (hand.valid) console.log(hand)
-    })
-    newBoard[1].hands.forEach(hand => {
-      if (hand.valid) console.log(hand)
-    })
+    if (!boardObj.validHands) this.setState({ noValid: true });
 
     this.setState({
       roundOver: true,
-      scoreBoard: newBoard
+      scoreBoard: boardObj.scoreBoard
     });
   };
 
@@ -495,6 +509,7 @@ class App extends Component {
         }
         <GameModal
           selectedHand={this.state.selectedHand !== null ? this.state.selectedHand : ''}
+          noValid={this.state.noValid}
           showModal={this.state.showModal}
           selectHand={this.selectHand}
           toggleModal={this.toggleModal}

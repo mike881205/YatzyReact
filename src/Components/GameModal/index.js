@@ -2,7 +2,7 @@ import React from 'react';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 
-const GameModal = ({ toggleModal, showModal, selectedHand, selectHand }) => {
+const GameModal = ({ toggleModal, showModal, selectedHand, selectHand, noValid }) => {
 
     const { name, score } = selectedHand;
 
@@ -13,6 +13,7 @@ const GameModal = ({ toggleModal, showModal, selectedHand, selectHand }) => {
 
     const handleSelect = e => {
         e.preventDefault();
+        toggleModal({ toggle: false, hand: selectedHand });
         selectHand(selectedHand);
     };
 
@@ -26,9 +27,16 @@ const GameModal = ({ toggleModal, showModal, selectedHand, selectHand }) => {
                 <Modal.Header>
                     <Modal.Title>{name}</Modal.Title>
                 </Modal.Header>
-                <Modal.Body>
-                    Select "{name}" for {score} {score > 1 ? "Points" : "Point"}?
-                </Modal.Body>
+                {
+                    !noValid ?
+                        <Modal.Body>
+                            Select "{name}" for {score} {score > 1 ? "Points" : "Point"}?
+                        </Modal.Body>
+                        :
+                        <Modal.Body>
+                            Remove "{name}"?
+                        </Modal.Body>
+                }
                 <Modal.Footer>
                     <Button variant="secondary" onClick={e => handleClose(e)}>
                         Nope!
