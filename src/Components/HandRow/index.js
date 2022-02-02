@@ -2,9 +2,7 @@ import React from 'react';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 
-const HandRow = ({ id, hand, roundOver, gameOver, roll, showModal, selectHand, toggleModal, selectionMade }) => {
-
-    const { name, score, valid, used, remove, removed } = hand;
+const HandRow = ({ classType, id, hand, name, score, toggleModal }) => {
 
     const handleClick = e => {
         e.preventDefault();
@@ -13,14 +11,7 @@ const HandRow = ({ id, hand, roundOver, gameOver, roll, showModal, selectHand, t
 
     return (
         <Row
-            className={
-                valid === 'total' ? 'btn-dark disabled' :
-                    removed ? "btn-secondary disabled" :
-                        used ? "btn-info disabled" :
-                            remove ? "btn-danger" :
-                                valid ? "btn-success" :
-                                    'disabled'
-            }
+            className={classType}
             id={id}
             style={{ 'margin': '1%' }}
             onClick={e => handleClick(e)}
@@ -29,7 +20,7 @@ const HandRow = ({ id, hand, roundOver, gameOver, roll, showModal, selectHand, t
                 <p><strong>{name}</strong></p>
             </Col>
             <Col>
-                <p><strong>{valid || used ? score : 0}</strong></p>
+                <p><strong>{score}</strong></p>
             </Col>
         </Row>
     );

@@ -66,8 +66,8 @@ const blankScoreBoard = () => {
         }
       ],
       handsTotal: 0,
-      bonus: () => { return this.handsTotal < 63 ? 0 : 35 },
-      total: () => { return this.handsTotal + this.bonus() }
+      bonus: total => { return total < 63 ? 0 : 35 },
+      total: (total, bonus) => { return total + bonus }
     },
     {
       section: 'bottom',
@@ -113,14 +113,6 @@ const blankScoreBoard = () => {
           score: 40
         },
         {
-          name: 'Yatzy',
-          valid: false,
-          remove: false,
-          used: false,
-          removed: false,
-          score: 50
-        },
-        {
           name: 'Chance',
           valid: false,
           remove: false,
@@ -129,14 +121,23 @@ const blankScoreBoard = () => {
           score: 0
         },
         {
-          name: 'Yatzy Bonus',
+          name: 'Yatzy',
           valid: false,
           remove: false,
-          total: 0,
-          score: 100
+          used: false,
+          removed: false,
+          score: 50
         }
       ],
-      handsTotal: 0
+      yatzyBonus: {
+        valid: false,
+        removed: false,
+        count: 0,
+        score: 100,
+        total: (count, score) => { return count * score }
+      },
+      handsTotal: 0,
+      total: (total, bonus) => { return total + bonus }
     },
     {
       grandTotal: 0
@@ -275,13 +276,13 @@ const checkKinds = (sortedArr, objArray, scoreBoard) => {
             scoreBoard[1].hands[1].valid = true;
             scoreBoard[1].hands[1].score = totalValues(sortedArr);
           };
-          if (!scoreBoard[1].hands[5].used && !scoreBoard[1].hands[5].removed) {
+          if (!scoreBoard[1].hands[6].used && !scoreBoard[1].hands[6].removed) {
             validHand = true
             scoreBoard[1].hands[5].valid = true;
           }
-          else if (!scoreBoard[1].hands[5].removed) {
+          else if (scoreBoard[1].hands[6].used) {
             validHand = true
-            scoreBoard[1].hands[7].valid = true;
+            scoreBoard[1].yatzyBonus.valid = true;
           };
           break;
       };
@@ -316,10 +317,10 @@ const findHands = (sortedArr, scoreBoard) => {
   });
 
   // Check chance && update scoreboard
-  if (!scoreBoard[1].hands[6].used && !scoreBoard[1].hands[6].removed) {
+  if (!scoreBoard[1].hands[5].used && !scoreBoard[1].hands[5].removed) {
     validHands = true;
-    scoreBoard[1].hands[6].valid = true;
-    scoreBoard[1].hands[6].score = totalValues(sortedArr);
+    scoreBoard[1].hands[5].valid = true;
+    scoreBoard[1].hands[5].score = totalValues(sortedArr);
   };
 
   const topHandObj = checkTopHands(unqObjArray, scoreBoard);
@@ -411,19 +412,9 @@ class App extends Component {
     const scoreBoard = [...this.state.scoreBoard];
     const finalVals = this.state.slots.map(slot => { return slot.number });
     const sortedVals = finalVals.sort((a, b) => { return a - b });
-    console.log(sortedVals)
     const boardObj = findHands(sortedVals, scoreBoard);
 
-    const hands = [...boardObj.scoreBoard[0].hands, ...boardObj.scoreBoard[1].hands]
-    hands.forEach(hand => {
-      const { name, remove, valid } = hand
-      if (remove || valid) {
-        console.log(name)
-        console.log(`remove: ${remove}`)
-        console.log(`valid: ${valid}`)
-        console.log("====================")
-      }
-    })
+    console.log(sortedVals)
 
     if (!boardObj.validHands) this.setState({ noValid: true });
 
@@ -466,32 +457,41 @@ class App extends Component {
         if (!this.state.noValid) {
           topHand.used = true;
           scoreBoard[0].handsTotal = scoreBoard[0].handsTotal + topHand.score;
-          console.log(`Valid: ${topHand.name}`)
         }
         else {
           topHand.removed = true;
-          console.log(`removed: ${topHand.name}`)
+          topHand.score = 0
         }
       };
+
+      // reset hand values
       !this.state.noValid ? topHand.valid = false : topHand.remove = false;
     });
 
-    // If no top hand matches, check the bottom hands for the selection
+    // if not top match, check the bottom hands
     if (!match) {
-      scoreBoard[1].hands.forEach(btmHand => {
-        if (btmHand.name === name) {
+      scoreBoard[1].hands.forEach(bottomHand => {
+        if (bottomHand.name === name) {
+          match = true
           if (!this.state.noValid) {
-            btmHand.used = true;
-            scoreBoard[1].handsTotal = scoreBoard[1].handsTotal + btmHand.score;
-            console.log(`Valid: ${btmHand.name}`)
+            bottomHand.used = true;
+            scoreBoard[1].handsTotal = scoreBoard[1].handsTotal + bottomHand.score;
           }
           else {
-            btmHand.removed = true;
-            console.log(`removed: ${btmHand.name}`)
+            if (name === "Yatzy") scoreBoard[1].yatzyBonus.removed = true;
+            bottomHand.removed = true;
           };
         };
-        !this.state.noValid ? btmHand.valid = false : btmHand.remove = false;
+
+        // reset hand values
+        !this.state.noValid ? bottomHand.valid = false : bottomHand.remove = false;
       });
+    };
+
+    // if no bottom match, check yatzy bonus
+    if (!match && name === "Yatzy Bonus") {
+      scoreBoard[1].yatzyBonus.count++;
+      scoreBoard[1].yatzyBonus.valid = false;
     };
 
     hands = [...scoreBoard[0].hands, ...scoreBoard[1].hands];
