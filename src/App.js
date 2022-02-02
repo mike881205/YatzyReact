@@ -506,7 +506,6 @@ class App extends Component {
           scoreBoard: scoreBoard,
           selectionMade: true,
           noValid: false
-
         });
         alert("Game Over")
         break;
@@ -536,7 +535,7 @@ class App extends Component {
               toggleModal={this.toggleModal}
             />
             :
-            ''
+            <></>
         }
         <GameModal
           selectedHand={this.state.selectedHand !== null ? this.state.selectedHand : ''}

@@ -3,7 +3,7 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import HandRow from '../HandRow';
 
-const ScoreBoard = ({ scoreBoard, roll, roundOver, gameOver, showModal, toggleModal, selectHand }) => {
+const ScoreBoard = ({ scoreBoard, roll, roundOver, gameOver, showModal, toggleModal, selectionMade, selectHand }) => {
 
     const topHands = [...scoreBoard[0].hands];
     const bottomHands = [...scoreBoard[1].hands];
@@ -26,6 +26,7 @@ const ScoreBoard = ({ scoreBoard, roll, roundOver, gameOver, showModal, toggleMo
                                     gameOver={gameOver}
                                     toggleModal={toggleModal}
                                     showModal={showModal}
+                                    selectionMade={selectionMade}
                                 />;
                             return rowChild;
                         })
@@ -49,6 +50,7 @@ const ScoreBoard = ({ scoreBoard, roll, roundOver, gameOver, showModal, toggleMo
                                     gameOver={gameOver}
                                     toggleModal={toggleModal}
                                     showModal={showModal}
+                                    selectionMade={selectionMade}
                                 />;
                             return rowChild;
                         })
