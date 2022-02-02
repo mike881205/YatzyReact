@@ -15,8 +15,6 @@ const ScoreBoard = ({ scoreBoard, roll, roundOver, gameOver, showModal, toggleMo
     const bottomScore = scoreBoard[1].total(bottomTotal, yatzyBonus);
     const grandTotal = topScore + bottomScore;
 
-    console.log(yatzyBonus)
-
     return (
         <>
             <Row style={{ 'margin': '1%' }}>

@@ -301,6 +301,12 @@ const checkKinds = (sortedArr, objArray, scoreBoard) => {
   return obj;
 };
 
+const getHandChoices = scoreBoard => {
+  const hands = [...scoreBoard[0].hands, ...scoreBoard[1].hands];
+  const choices = hands.filter(hand => { return hand.valid || hand.remove ? hand : ''; });
+  return choices;
+};
+
 const findHands = (sortedArr, scoreBoard) => {
 
   const uniqueVals = removeDuplicates(sortedArr);
@@ -413,8 +419,10 @@ class App extends Component {
     const finalVals = this.state.slots.map(slot => { return slot.number });
     const sortedVals = finalVals.sort((a, b) => { return a - b });
     const boardObj = findHands(sortedVals, scoreBoard);
+    const handChoices = getHandChoices(boardObj.scoreBoard);
 
     console.log(sortedVals)
+    console.log(handChoices)
 
     if (!boardObj.validHands) this.setState({ noValid: true });
 
