@@ -410,7 +410,9 @@ class App extends Component {
       roll: 0,
       roundOver: false,
       selectionMade: false,
-      selectedHand: { toggle: false, hand: null }
+      selectedHand: { toggle: false, hand: null },
+      showModal: false,
+      noValid: false
     });
   };
 

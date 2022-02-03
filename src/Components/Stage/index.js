@@ -4,7 +4,7 @@ import ScoreBoard from '../ScoreBoard';
 import Game from '../Game';
 
 const Stage = ({ state, shuffle, holdSlot, startGame, startRound, endRound, selectHand, toggleModal }) => {
-    const { roll, roundOver, gameOver, scoreBoard, showModal, selectionMade } = state;
+    const { roll, roundOver, gameOver, scoreBoard, showModal, selectionMade, noValid } = state;
     return (
         <Container className="stage">
             <Game
@@ -22,6 +22,7 @@ const Stage = ({ state, shuffle, holdSlot, startGame, startRound, endRound, sele
                 gameOver={gameOver}
                 showModal={showModal}
                 selectionMade={selectionMade}
+                noValid={noValid}
                 selectHand={selectHand}
                 toggleModal={toggleModal}
             />
