@@ -16,6 +16,7 @@ const Stage = ({ state, shuffle, holdSlot, startGame, startRound, endRound, sele
                 endRound={endRound}
             />
             <ScoreBoard
+                gameOver={gameOver}
                 roll={roll}
                 scoreBoard={scoreBoard}
                 roundOver={roundOver}

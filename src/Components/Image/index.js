@@ -11,7 +11,18 @@ const Image = ({ image, roll }) => {
                     roll === 0 ?
                         <h1>{letter}</h1>
                         :
-                        <img src={dice} alt={dice}></img>
+                        <img 
+                        style={{
+                            'height': '100%', 
+                            'width': '100%',
+                            'borderRadius': '15%',
+                            'boxShadow': '2px 2px 4px #000000'
+                        }} 
+                        src={dice} 
+                        alt={dice}
+                        >
+
+                        </img>
                 }
             </Col>
         </Row>

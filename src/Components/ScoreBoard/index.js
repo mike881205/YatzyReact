@@ -3,7 +3,7 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import HandRow from '../HandRow';
 
-const ScoreBoard = ({ scoreBoard, roundOver, toggleModal, selectionMade, noValid }) => {
+const ScoreBoard = ({ scoreBoard, roundOver, toggleModal, selectionMade, noValid, gameOver }) => {
 
     const topTotal = scoreBoard[0].handsTotal
     const bottomTotal = scoreBoard[1].handsTotal
@@ -62,7 +62,7 @@ const ScoreBoard = ({ scoreBoard, roundOver, toggleModal, selectionMade, noValid
     return (
         <>
             {
-                roundOver && !selectionMade ?
+                !gameOver && roundOver && !selectionMade ?
                     <Row style={{ 'margin': '1%' }}>
                         <Col style={{ 'margin': '1%' }}>
                             <h5>{!noValid ? "Select a Hand" : "Select a Hand to Remove"}</h5>
@@ -98,9 +98,19 @@ const ScoreBoard = ({ scoreBoard, roundOver, toggleModal, selectionMade, noValid
                     <HandRow
                         key={"yatzy bonus"}
                         id={"yatzy bonus"}
-                        classType={scoreBoard[1].yatzyBonus.valid ? "btn-success" : !roundOver || selectionMade ? "btn-secondary disabled" : "disabled"}
+                        classType={
+                            scoreBoard[1].yatzyBonus.valid ? "btn-success" :
+                                (!roundOver || selectionMade) && scoreBoard[1].yatzyBonus.removed ? "btn-secondary disabled" :
+                                    (!roundOver || selectionMade) && scoreBoard[1].yatzyBonus.count > 0 ? "btn-info disabled" :
+                                        "disabled"
+                        }
                         toggleModal={toggleModal}
-                        hand={{ name: "Yatzy Bonus", score: scoreBoard[1].yatzyBonus.score, valid: scoreBoard[1].yatzyBonus.valid, removed: scoreBoard[1].yatzyBonus.removed }}
+                        hand={{
+                            name: "Yatzy Bonus",
+                            score: scoreBoard[1].yatzyBonus.score,
+                            valid: scoreBoard[1].yatzyBonus.valid,
+                            removed: scoreBoard[1].yatzyBonus.removed
+                        }}
                         name={`Yatzy Bonus x${scoreBoard[1].yatzyBonus.count}`}
                         score={scoreBoard[1].yatzyBonus.valid ? 100 : yatzyBonus}
                     />

@@ -19,7 +19,7 @@ const Slot = ({ roll, image, held, holdSlot, id, roundOver, number }) => {
                 </Col>
             </Row> */}
             <Image image={image} roll={roll} />
-            <Row style={{ 'margin': '1%' }}>
+            <Row style={{ 'margin': '5%' }}>
                 <Col>
                     <Button
                         id={id}
